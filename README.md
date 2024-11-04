@@ -1,0 +1,2 @@
+# Piercarlo-Esercizio
+Esercizi Python 
