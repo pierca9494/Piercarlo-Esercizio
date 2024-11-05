@@ -2,7 +2,7 @@ class ContoBancario:
     def __init__(self, titolare, saldo=0.0):
         # Attributi privati
         self.__titolare = titolare if isinstance(titolare, str)  else None
-        self.__saldo = saldo if saldo >= 0 else 0.0
+        self.__saldo = saldo 
 
     
     def deposita(self, importo):
@@ -39,6 +39,14 @@ class ContoBancario:
         else:
             print("Nome del titolare non valido.")
             
+    def __test(self):
+        print("Eseguendo il metodo di test interno...")
+        # Puoi inserire qui i controlli che desideri
+        if  self.__saldo >= 0:
+            print("Conto valido.")
+        else:
+            print("Conto non valido.")
+            
             
 
 
@@ -48,4 +56,5 @@ conto.preleva(200)
 print(conto.visualizza_saldo())
 conto.set_titolare("Luigi Bianchi")
 print("Titolare:", conto.get_titolare())
+conto._ContoBancario__test() #metodo name mangling per accesso forzato non convenzionale
 
