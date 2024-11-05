@@ -14,7 +14,7 @@ class ContoBancario:
 
     
     def preleva(self, importo):
-        if importo > 0:
+        if self._ContoBancario__test() == True:
             if self.__saldo >= importo:
                 self.__saldo -= importo
                 print(f"Prelievo di {importo} completato.")
@@ -42,10 +42,13 @@ class ContoBancario:
     def __test(self):
         print("Eseguendo il metodo di test interno...")
         # Puoi inserire qui i controlli che desideri
-        if  self.__saldo >= 0:
+        if  self.__saldo > 0:
             print("Conto valido.")
+            self.x = True
+            return self.x
         else:
             print("Conto non valido.")
+            
             
             
 
