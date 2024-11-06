@@ -95,6 +95,16 @@ class Teatro:
             print("Posti VIP occupati:", ", ".join(posti_vip))
         else:
             print("Nessun posto VIP occupato.")
+            
+    def __test(self):
+        print("Eseguendo il metodo di test interno...")
+        # Puoi inserire qui i controlli che desideri
+        if len(self._posti) + len(self.__postiVip) <= 100:
+            print("Teatro available.")
+        else:
+            print("Teatro overbooked.")
+            self.x = True
+            return self.x
 
 
 # Esempio di utilizzo:
