@@ -5,6 +5,10 @@ class Prodotto:
         self.prezzo_vendita = prezzo_vendita
         self.quantita = quantita
         
+    def traccia(self):
+        return f"{self.nome} e'stato prodotto al costo di produzione: {self.costo_produzione}"
+        
+        
         
     def calcola_profitto(self):
         
@@ -15,6 +19,11 @@ class Abbligliamento(Prodotto):
     def __init__(self, nome, costo_produzione, prezzo_vendita, tipo):
         super().__init__(nome, costo_produzione, prezzo_vendita)
         self.tipo = tipo
+        
+    def traccia(self):
+        super().traccia()
+        return f"Abbigliamento '{self.nome}' e'stato prodotto al costo di produzione: {self.costo_produzione}, Tipo: {self.tipo}"
+
         
     def set_abbigliamento(self, nome, costo_produzione, prezzo_vendita, tipo):
          self.nome = nome
@@ -39,6 +48,10 @@ class Elettronica(Prodotto):
          self.prezzo_vendita = prezzo_vendita
          self.marca = marca
          return f"Elettronica '{self.nome}' aggiornata."
+     
+    def traccia(self):
+        super().traccia()
+        return f"Elettronica '{self.nome}' e'stato prodotto al costo di produzione: {self.costo_produzione}, Marca: {self.marca}"
      
     def get_elettronica(self):
          return f"Nome: {self.nome}, Costo produzione: {self.costo_produzione}, Prezzo vendita: {self.prezzo_vendita}, Marca: {self.marca}"
@@ -80,6 +93,8 @@ class Fabbrica:
         else:
             print(f"Non posso reso {quantita} {prodotto}, non esiste.")
             
+    
+            
             
 #TEST 
 fabbrica = Fabbrica()
@@ -87,6 +102,11 @@ fabbrica = Fabbrica()
 
 prodotto1 = Prodotto("Prodotto 1", 100, 200, 2)
 prodotto2 = Prodotto("Prodotto 2", 150, 250,2 )
+
+
+maglia= Abbligliamento()
+produzione = Fabbrica(maglia)
+fabbrica.aggiungi_prodotto()
 
 fabbrica.aggiungi_prodotto(prodotto1, 50)
 fabbrica.aggiungi_prodotto(prodotto2, 30)
