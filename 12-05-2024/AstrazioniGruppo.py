@@ -138,7 +138,7 @@ class Motocicletta(Veicolo):
         if self._tipo.lower() == "sportiva":
             print("La motocicletta sportiva sta facendo un'impennata!")
         else:
-            print("Questo tipo di motocicletta non è adatto per le impennate.")
+            print("Questo tipo di motocicletta  impenna.")
 
     ## implemento il metodo astratto della classe padre Veicolo
     def mostra_informazioni(self):
