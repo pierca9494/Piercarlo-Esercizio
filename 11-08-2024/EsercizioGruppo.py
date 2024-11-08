@@ -198,6 +198,8 @@ def game():
                         play_level(int(chosen_level), user)
                     else:
                         print("Livello non valido o non sbloccato.")
+            else:
+                print("Username o password non validi.")
         elif action.lower() == 'esci':
             print("Uscita dal gioco. Grazie per aver giocato!")
             lista = gestore_utenti.get_users_ord_score()
@@ -206,6 +208,7 @@ def game():
                 output_string += stringa
             print(output_string)
             io_classifica(output_string)
+            break
 
 
 
