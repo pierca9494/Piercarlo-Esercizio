@@ -7,7 +7,8 @@ class NumpyOperations:
     def verifica_tipo_dato(self):
         return self.array.dtype
     def cambio_tipo_dato(self, new_dtype):
-        return self.array.astype(new_dtype)
+        self.array = self.array.astype(new_dtype)
+        return self.array
     
     def forma_dato(self):
         return self.array.shape
