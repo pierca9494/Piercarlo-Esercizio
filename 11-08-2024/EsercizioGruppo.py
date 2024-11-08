@@ -9,7 +9,19 @@
 # 3 check ogni ora
 
 
-#
+### Collaboratori: Daniele Florio / Pier Carlo Ciraselli / Pierfrancesco Chiucchiolo
+
+
+def io_classifica(stringa):
+    file1 = open("classifica.txt", "w", encoding = "utf-8")
+
+    # Writing multiple strings
+    # at a time
+    file1.writelines(stringa)
+
+    # Closing file
+    file1.close()
+
 
 
 class User():
@@ -60,7 +72,7 @@ class Users():
     
     # Login, controlla l'input e la password dell'utente ed ritorna True, l'utente in caso di affermativo, altrimenti False
     def login(self):
-        username = input('Usernname: ')
+        username = input('Username: ')
         password = input('Password: ')
         res_name = self.__input(username)
         res_pass = self.__input(password)
@@ -70,7 +82,7 @@ class Users():
                 if self.__check_password(password, user.get_password()):
                     return True, user
             
-        return False 
+        return False,
     
     # Aggiunge l'untete al dizionario
     def __add_user(self, username, password):
@@ -79,7 +91,7 @@ class Users():
     
     # Registrazione, controlla l'input e la password dell'utente ed aggiunge l'utente al dizionario se validi, altrimenti False
     def register(self):
-        username = input('Usernname: ')
+        username = input('Username: ')
         password = input('Password: ')
         res_name = self.__input(username)
         res_pass = self.__input(password)
@@ -90,10 +102,27 @@ class Users():
                 return True
         return False
     
+    def get_users_ord_score(self):
+        temp = {}
+        for key, user in self.__users.items():
+            temp[key] = user.get_score()
+            self.__users[key].get_score()
+        temp = sorted(temp.items(), reverse=True)
+        res = self.__deconstructor(temp)
+        return res
+            
+    def __deconstructor(self, dizionario):
+        stringa = []
+        for key, elemento in dizionario:
+            parziale = f"Giocatore: {key} punteggio: {elemento} \n"
+            stringa.append(parziale)
+            
+        return stringa
+
     
 
-
-# Domande e risposte per ciascun livello
+    
+    
 questions = [
     {"question": "Quanto fa 2 + 2?", "answer": 4},
     {"question": "Quanto fa 5 x 3?", "answer": 15},
@@ -171,7 +200,15 @@ def game():
                         print("Livello non valido o non sbloccato.")
         elif action.lower() == 'esci':
             print("Uscita dal gioco. Grazie per aver giocato!")
-            break
+            lista = gestore_utenti.get_users_ord_score()
+            output_string = ""
+            for stringa in lista:
+                output_string += stringa
+            print(output_string)
+            io_classifica(output_string)
+
+
+
         else:
             print("Comando non riconosciuto.")
 
