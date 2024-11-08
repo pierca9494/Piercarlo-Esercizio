@@ -56,7 +56,7 @@ def esegui_applicazione():
         
         elif scelta == '3':
             start = int(input("Indice di inizio dell'intervallo: "))
-            end = int(input("Indice di fine dell'intervallo escluso: "))
+            end = int(input("Indice di fine dell'intervallo: "))
             print("Elementi da", start, "a", end, ":", slicing_array.elementi_intervallo(start, end))
         
         elif scelta == '4':
