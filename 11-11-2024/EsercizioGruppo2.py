@@ -61,7 +61,7 @@ class GestioneScolastica:
         # file = open(filepath, "r", encoding = "utf-8")
         # stringa = file.read()
         # file.close()
-        with open(self.database_file, "r") as file:
+        with open("database_scolastico.txt", "r") as file:
             stringa = file.read()
         righe = stringa.splitlines()
 
@@ -77,13 +77,13 @@ class GestioneScolastica:
 
 
     def write_text_db(dizionario):
-        file = open("text_db2.txt", "w", encoding = "utf-8")
+        file = open("database_scolastico.txt", "w", encoding = "utf-8")
         for key in dizionario.keys():
-        stringa1 = key + "/n"
-        stringa2 = dizionario.get(key) + "/n"
-        file.write(stringa1)
-        file.write(stringa2)
-    file.close()
+            stringa1 = key + "/n"
+            stringa2 = dizionario.get(key) + "/n"
+            file.write(stringa1)
+            file.write(stringa2)
+        file.close()
             
     
             
@@ -97,9 +97,10 @@ class GestioneScolastica:
             stringa += " ha una media voti pari a: " + str(media)
             print(stringa)
 
-alunni_media(diz)
+
 
 # Menu principale
+#funzione principale# Menu principale
 #funzione principale
 def main():
     alunni = GestioneScolastica(database_file)
@@ -108,32 +109,41 @@ def main():
         print("1. Aggiungi alunno")
         print("2. Elimina alunno")
         print("3. Visualizza alunni")
-        print("4. media voti di un alunno")
+        print("4. Media voti di un alunno")
         print("5. Esci")
-        
-        scelta = input("Scegli un'opzione(1/2/3/4): ")
+
+        scelta = input("Scegli un'opzione(1/2/3/4/5): ")
         
         if scelta == "1":
             nome = input("Nome alunno: ")
             voti = list(map(int, input("Voti: ").split(",")))
-            aggiungi_alunno(nome, voti, alunni)
-            salva_alunni(alunni)
+            studente=Studente(nome, voti)
+            alunni.aggiungi_studente(studente)
         
-        elif scelta =="2":
-            nome = input("Nome alunno da eliminare: ")
-            alunni = elimina_alunno(nome, alunni)
-            salva_alunni(alunni)
+        elif scelta == "2":
+            nome = input("Nome alunno da eliminare: ")  # Corretto da studente.nome
+            alunni.elimina_studente(nome)
         
-        elif scelta =="3":
-            visualizza_alunni(alunni)
+        elif scelta == "3":
+            alunni.visualizza_studenti()
         
-        elif scelta =="4":
+        elif scelta == "4":
+            nome = input("Inserisci il nome dell'alunno per calcolare la media: ")
+            dizionario = alunni.alunni_media(nome)
+            if nome in dizionario:
+                voti = list(map(int, dizionario[nome].split(",")))
+                media = sum(voti) / len(voti) if voti else 0
+                print(f"Media dei voti di {nome}: {media}")
+            else:
+                print(f"Studente {nome} non trovato nel database.")
+        
+        elif scelta == "5":
             print("Arrivederci!")
             break
         
         else:
             print("Scelta non valida")
-
+            
 #esegue il programma
 if __name__ == "__main__":
     main()
