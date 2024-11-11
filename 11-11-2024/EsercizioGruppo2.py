@@ -1,7 +1,16 @@
 # Nome del file di database
 database_file = "database_scolastico.txt"
 
+class Studente:
+    def __init__(self, nome, voti):
+        self.nome = nome
+        self.voti = voti
 
+    def __str__(self):
+        return f"{self.nome} - Voti: {self.voti}"
+
+    def to_string(self):
+        return f"{self.nome}:{','.join(map(str, self.voti))}"
 
 class GestioneScolastica:
     def __init__(self, database_file):
@@ -31,6 +40,23 @@ class GestioneScolastica:
         else:
             print(f"Studente {nome} non trovato nel database.")
 
+    def visualizza_studenti(self):
+        try:
+            with open(self.database_file, "r") as file:
+                lines = file.readlines()
+                if not lines:
+                    print("Il database è vuoto.")
+                else:
+                    print("Lista degli studenti e dei voti:")
+                    for line in lines:
+                        nome, voti = line.strip().split(":")
+                        voti = list(map(int, voti.split(",")))
+                        studente = Studente(nome, voti)
+                        print(studente)
+        except FileNotFoundError:
+            print("Il database non esiste ancora.")
+            
+            
     def read_text_db(filepath):
         # file = open(filepath, "r", encoding = "utf-8")
         # stringa = file.read()
@@ -58,10 +84,20 @@ class GestioneScolastica:
         file.write(stringa1)
         file.write(stringa2)
     file.close()
-        
+            
+    
+            
+    def alunni_media(database_file):
+        for key in database_file:
+            stringa = "lo studente : " + key
+            lista_voti = database_file.get(key).split(",")
+            media = 0
+            for voto in lista_voti:
+                media += int(voto)/len(lista_voti)
+            stringa += " ha una media voti pari a: " + str(media)
+            print(stringa)
 
-
-write_text_db(diz)
+alunni_media(diz)
 
 # Menu principale
 #funzione principale
@@ -72,19 +108,20 @@ def main():
         print("1. Aggiungi alunno")
         print("2. Elimina alunno")
         print("3. Visualizza alunni")
-        print("4. Esci")
+        print("4. media voti di un alunno")
+        print("5. Esci")
         
         scelta = input("Scegli un'opzione(1/2/3/4): ")
         
         if scelta == "1":
-            studente3.nome = input("Nome alunno: ")
+            nome = input("Nome alunno: ")
             voti = list(map(int, input("Voti: ").split(",")))
-            aggiungi_alunno(studente.nome, voti, alunni)
+            aggiungi_alunno(nome, voti, alunni)
             salva_alunni(alunni)
         
         elif scelta =="2":
-            studente.nome = input("Nome alunno da eliminare: ")
-            alunni = elimina_alunno(studente.nome, alunni)
+            nome = input("Nome alunno da eliminare: ")
+            alunni = elimina_alunno(nome, alunni)
             salva_alunni(alunni)
         
         elif scelta =="3":
