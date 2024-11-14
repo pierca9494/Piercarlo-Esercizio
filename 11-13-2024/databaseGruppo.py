@@ -1,100 +1,58 @@
 import mysql.connector
-# try:
-
-#     miodb= mysql.connector.connect(
-#         host= "localhost",
-#         user="root",
-#         password= "root"
-#         )
-    
-#     c=miodb.cursor()
-#     try:
-#      c.execute("CREATE DATABASE IF NOT EXISTS scuola_db")
-#      print("Database 'scuola_db' creato con successo.")
-#     except mysql.connector.Error as err:
-#      print(f"Errore durante l'esecuzione di CREATE DATABASE: {err}")
-#     except :
-#      print("Errore non riconosciuto")  
-
-# except mysql.connector.Error as conn_err:
-#  print(f"Errore di connessione al server MySQL: {conn_err}")
-# except :
-#  print("Errore non riconosciuto")
-# miodb.database= "scuola_db"
-# c.execute("""create table if not exists studenti_
-#           (id int AUTO_INCREMENT PRIMARY KEY,
-#           name VARCHAR(255)""")
-
-# c.execute("""
-#     CREATE TABLE IF NOT EXISTS materie (
-#         id INT AUTO_INCREMENT PRIMARY KEY,
-#         nome VARCHAR(255)  UNIQUE NOT NULL 
-#     )
-# """)
-
-# c.execute (""""
-#     id INT AUTO_INCREMENT PRIMARY KEY,
-#     studente_id INT,
-#     materia_id INT,
-#     voto INT,
-#     FOREIGN KEY (studente_id) REFERENCES studenti_(id),
-#     FOREIGN KEY (materia_id) REFERENCES materie(id)
-#     )
-# """)
-
-
-
-
-
-#class Studente:
-#   def __init__(self,name,voto_Ita,voto_Mate):
-#     self.name=name
-#     self.voto_Ita=voto_Ita
-#     self.voto_Mate=voto_Mate
-
-
-
+import hashlib
 
 class GestioneStudentiDB:
-    def __init__(self,host= "localhost", user = "root", password= "root", database = "scuola_db"):
+    def __init__(self):
         self.miodb = mysql.connector.connect(
-            host= host,
-            user=user,
-            password= password,
-            database=database)
+            host="localhost",
+            user="root",
+            password="root",
+            database="scuola_db"
+        )
         
         self.cursor = self.miodb.cursor()
         
-        
-    
-    self.cursor.execute("CREATE DATABASE IF NOT EXISTS scuola_db")
-    print("Database 'scuola_db' creato con successo.") 
+        # Creazione database e tabelle
+        self.cursor.execute("CREATE DATABASE IF NOT EXISTS scuola_db")
+        print("Database 'scuola_db' creato con successo.") 
 
-
-    self.cursor.execute("""create table if not exists studenti_
-          (id int AUTO_INCREMENT PRIMARY KEY,
-          name VARCHAR(255)""")
-
-    self.cursor.execute("""
-    CREATE TABLE IF NOT EXISTS materie (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255)  UNIQUE NOT NULL 
-    )
-""")
-
-    self.cursor.execute (""""
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    studente_id INT,
-    materia_id INT,
-    voto INT,
-    FOREIGN KEY (studente_id) REFERENCES studenti_(id),
-    FOREIGN KEY (materia_id) REFERENCES materie(id)
-    )
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS studenti (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255)
+        )
         """)
+
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS materie (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) UNIQUE NOT NULL
+        )
+        """)
+
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS voti (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            studente_id INT,
+            materia_id INT,
+            voto INT,
+            FOREIGN KEY (studente_id) REFERENCES studenti(id),
+            FOREIGN KEY (materia_id) REFERENCES materie(id)
+        )
+        """)
+
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS utenti(
+            id INT auto_increment primary key,
+            username VARCHAR(255) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            ruolo enum("admin","studente") ) """  )
+            
+       
 
     def aggiungi_studente(self, nome):
         try:
-            self.cursor.execute("INSERT INTO studenti (nome) VALUES (%s)", (nome,))
+            self.cursor.execute("INSERT INTO studenti (name) VALUES (%s)", (nome,))
             self.miodb.commit()
             print(f"Studente '{nome}' aggiunto.")
         except mysql.connector.Error as err:
@@ -106,11 +64,11 @@ class GestioneStudentiDB:
             self.miodb.commit()
             print(f"Materia '{materia}' aggiunta.")
         except mysql.connector.Error as err:
-          print(f"Errore: {err}")
+            print(f"Errore: {err}")
 
     def aggiungi_voto(self, nome, materia, voto):
         try:
-            self.cursor.execute("SELECT id FROM studenti WHERE nome = %s", (nome,))
+            self.cursor.execute("SELECT id FROM studenti WHERE name = %s", (nome,))
             studente = self.cursor.fetchone()
             self.cursor.execute("SELECT id FROM materie WHERE nome = %s", (materia,))
             materia_id = self.cursor.fetchone()
@@ -127,7 +85,7 @@ class GestioneStudentiDB:
 
     def elimina_studente(self, nome):
         try:
-            self.cursor.execute("DELETE FROM studenti WHERE nome = %s", (nome,))
+            self.cursor.execute("DELETE FROM studenti WHERE name = %s", (nome,))
             self.miodb.commit()
             print(f"Studente '{nome}' eliminato.")
         except mysql.connector.Error as err:
@@ -135,7 +93,7 @@ class GestioneStudentiDB:
 
     def modifica_voto(self, nome, materia, indice, nuovo_voto):
         try:
-            self.cursor.execute("SELECT id FROM studenti WHERE nome = %s", (nome,))
+            self.cursor.execute("SELECT id FROM studenti WHERE name = %s", (nome,))
             studente_id = self.cursor.fetchone()
             self.cursor.execute("SELECT id FROM materie WHERE nome = %s", (materia,))
             materia_id = self.cursor.fetchone()
@@ -160,7 +118,7 @@ class GestioneStudentiDB:
 
     def stampa_studenti(self):
         try:
-            self.cursor.execute("SELECT id, nome FROM studenti")
+            self.cursor.execute("SELECT id, name FROM studenti")
             studenti = self.cursor.fetchall()
 
             for studente in studenti:
@@ -194,63 +152,93 @@ class GestioneStudentiDB:
         self.cursor.close()
         self.miodb.close()
 
+    def crea_utente(self,username,psw,ruolo):
+        password = hashlib.md5(psw.encode()).hexdigest()  
+        self.cursor.execute("INSERT INTO utenti (username,password,ruolo) VALUES( %s,%s,%s)",(username,password,ruolo))
+        self.miodb.commit()
+
+    def login(self,username,psw,ruolo):
+        password = hashlib.md5(psw.encode()).hexdigest()  
+        self.cursor.execute("SELECT * FROM utenti WHERE username = %s and password = %s  and ruolo = %s ",(username,password,ruolo))
+        user= self.cursor.fetchone()
+        return user
+
 
 # Funzione di menu per interazione
 def menu():
-    gestione = GestioneStudentiDB(
-        host="localhost",
-        user="tuo_utente",
-        password="tua_password",
-        database="gestione_studenti"
-    )
-
+    gestione = GestioneStudentiDB()
+    c=gestione.miodb.cursor()
+    c.execute("SELECT * from utenti where ruolo = 'admin' ")  
+    if c.fetchone()  is None :
+        print("Nessun admin trovato")
+        admin_user=input("Inserisci admin ")
+        admin_psw=input("Inserisci password ")
+        gestione.crea_utente(admin_user,admin_psw,"admin")
+     
     while True:
+
         print("\n--- Menu Gestionale Studenti ---")
-        print("1. Aggiungi studente")
-        print("2. Aggiungi materia")
-        print("3. Aggiungi voto")
-        print("4. Elimina studente")
-        print("5. Modifica voto")
-        print("6. Stampa studenti e medie")
-        print("7. Esci")
 
-        scelta = input("Seleziona un'opzione: ")
+        username=input("Inserisci utente : ")
+        password=input("Inserisci password ")
+        ruolo=input("Inserisci ruolo admin o studente ")
+        user=gestione.login(username,password,ruolo)
+        if user:
+            if ruolo== "admin":
+                print("1. Aggiungi studente")
+                print("2. Aggiungi materia")
+                print("3. Aggiungi voto")
+                print("4. Elimina studente")
+                print("5. Modifica voto")
+                print("6. Stampa studenti e medie")
+                print("7. Esci")
+                scelta = input("Seleziona un'opzione: ")
 
-        if scelta == "1":
-            nome = input("Inserisci il nome dello studente: ")
-            gestione.aggiungi_studente(nome)
+                if scelta == "1":
+                    nome = input("Inserisci il nome dello studente: ")
+                    password=  input("Inserisci password ")
+                    ruolo=input("Inserisci ruolo admin/studente")
+                    gestione.crea_utente(nome,password,ruolo)
+                    gestione.aggiungi_studente(nome)
 
-        elif scelta == "2":
-            materia = input("Inserisci il nome della materia: ")
-            gestione.aggiungi_materia(materia)
+                elif scelta == "2":
+                    materia = input("Inserisci il nome della materia: ")
+                    gestione.aggiungi_materia(materia)
 
-        elif scelta == "3":
-            nome = input("Inserisci il nome dello studente: ")
-            materia = input("Inserisci la materia: ")
-            voto = int(input("Inserisci il voto: "))
-            gestione.aggiungi_voto(nome, materia, voto)
+                elif scelta == "3":
+                    nome = input("Inserisci il nome dello studente: ")
+                    materia = input("Inserisci la materia: ")
+                    voto = int(input("Inserisci il voto: "))
+                    gestione.aggiungi_voto(nome, materia, voto)
 
-        elif scelta == "4":
-            nome = input("Inserisci il nome dello studente da eliminare: ")
-            gestione.elimina_studente(nome)
+                elif scelta == "4":
+                    nome = input("Inserisci il nome dello studente da eliminare: ")
+                    gestione.elimina_studente(nome)
 
-        elif scelta == "5":
-            nome = input("Inserisci il nome dello studente: ")
-            materia = input("Inserisci la materia: ")
-            indice = int(input("Inserisci l'indice del voto da modificare (0 per il primo voto, 1 per il secondo, ecc.): "))
-            nuovo_voto = int(input("Inserisci il nuovo voto: "))
-            gestione.modifica_voto(nome, materia, indice, nuovo_voto)
+                elif scelta == "5":
+                    nome = input("Inserisci il nome dello studente: ")
+                    materia = input("Inserisci la materia: ")
+                    indice = int(input("Inserisci l'indice del voto da modificare (0 per il primo voto, 1 per il secondo, ecc.): "))
+                    nuovo_voto = int(input("Inserisci il nuovo voto: "))
+                    gestione.modifica_voto(nome, materia, indice, nuovo_voto)
 
-        elif scelta == "6":
-            gestione.stampa_studenti()
+                elif scelta == "6":
+                    gestione.stampa_studenti()
 
-        elif scelta == "7":
-            print("Uscita dal gestionale.")
-            gestione.chiudi_connessione()
-            break
+                elif scelta == "7":
+                    print("Uscita dal gestionale.")
+                    gestione.chiudi_connessione()
+                    break
+            elif user["ruolo"] == "studente":
+                print("6. Stampa studenti e medie")
+                gestione.stampa_studenti()
+            else:
+                print("Ruolo non valido")
 
         else:
             print("Opzione non valida, riprova.")
+           
+
 
 # Avvia il menu gestionale
 menu()
