@@ -1,74 +1,81 @@
-import requests
-import geocoder
+import requests, json
 
-# Funzione per ottenere la latitudine e la longitudine tramite l'indirizzo IP
-def get_location():
-    g = geocoder.ip('me')
-    return g.latlng if g.latlng else (None, None)
 
-# Funzione per ottenere le previsioni meteo
-def get_weather_forecast(latitude, longitude, days, include_wind, include_precipitation):
-    url = "https://api.open-meteo.com/v1/forecast"
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        "daily": "temperature_2m_max,temperature_2m_min",
-        "timezone": "auto",
-    }
+def coordinate_città(città_nome):
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={città_nome}&count=1&language=en&format=json"
     
-    # Aggiungi opzioni in base alla scelta dell'utente
-    if include_wind:
-        params["daily"] += ",windspeed_10m_max"
-    if include_precipitation:
-        params["daily"] += ",precipitation_sum"
+    response = requests.get(url)
+    data = response.json()
+    #print("GPS", data)
+
+    if 'results' in data and data['results']:
+        città_data = data['results'][0]
+        latitudine = città_data['latitude']
+        longitudine = città_data['longitude']
+        print(f"Coordinate di {città_nome}: Latitudine {latitudine}, Longitudine {longitudine}")
+        return latitudine, longitudine
+    else:
+        print("Città non trovata.")
+        return None, None
+
+    
+
+precipitazioni = ""
+vento = ""
+
+scelta_precipitazioni = input("Vuoi mostrare le probabilità di precipitazione?: (Y/N)").lower()
+if scelta_precipitazioni == "y":
+    precipitazioni = ",precipitation_probability"
+
+scelta_vento = input("Vuoi mostrare la velocità del vento?: (Y/N)").lower()
+if scelta_vento == "y":
+    vento = ",wind_speed_10m"
+
+choice = True
+while choice:
+    scelta = int(input("Quanti giorni vuoi mostrare?: (1/3/7)"))
+    if scelta in [1,3,7]:
+        giorni = scelta
+        choice = False
+    else:
+        print("Giorni non supportati.")
+
+
+città = input("Inserisci una città: ").lower()
+latitudine, longitudine = coordinate_città(città)
+
+
+link = f"https://api.open-meteo.com/v1/forecast?latitude={latitudine}&longitude={longitudine}&hourly=temperature_2m{precipitazioni}{vento}&forecast_days={giorni}"
+risposta = requests.get(link)
+
+if risposta.status_code != 200:
+
+    print("ERRORE")
+
+else:
+
+    risposta_text = risposta.text
+    risposta_json = json.loads(risposta_text)
+
+    if scelta_vento == "y" and scelta_precipitazioni == "y":
+        print("data/ora \t probabilità di precipitazione (%) \t velocità vento (km/h) \t temperatura (C°)")
+        for i in range(len(risposta_json["hourly"]["time"])):
+            print(risposta_json["hourly"]["time"][i],"\t", risposta_json["hourly"]["precipitation_probability"][i] ,"\t", risposta_json["hourly"]["wind_speed_10m"][i],"\t", risposta_json["hourly"]["temperature_2m"][i])
         
-    # Ottieni dati per il numero di giorni scelto
-    params["forecast_days"] = days
+    elif scelta_vento != "y" and scelta_precipitazioni == "y":
+        
+        print("data/ora \t probabilità di precipitazione (%) \t temperatura (C°)")
+        for i in range(len(risposta_json["hourly"]["time"])):
+            print(risposta_json["hourly"]["time"][i],"\t", risposta_json["hourly"]["precipitation_probability"][i] ,"\t", risposta_json["hourly"]["temperature_2m"][i])
+    
+    elif scelta_vento != "y" and scelta_precipitazioni != "y":
+        
+        print("data/ora \t temperatura (C°)")
+        for i in range(len(risposta_json["hourly"]["time"])):
+            print(risposta_json["hourly"]["time"][i],"\t", risposta_json["hourly"]["temperature_2m"][i])       
 
-    response = requests.get(url, params=params)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("Errore nella richiesta meteo:", response.status_code)
-        return None
+    elif      scelta_vento == "y" and scelta_precipitazioni != "y":
 
-# Funzione principale
-def main():
-    latitude, longitude = get_location()
-    
-    if not latitude or not longitude:
-        print("Impossibile ottenere la posizione. Verifica la connessione Internet.")
-        return
-    
-    # Input dell'utente per le opzioni di visualizzazione
-    print("Scegliere il numero di giorni per le previsioni (1, 3, o 7): ")
-    days = int(input("Giorni: "))
-    
-    include_wind = input("Vuoi visualizzare la velocità del vento? (s/n): ").strip().lower() == 's'
-    include_precipitation = input("Vuoi visualizzare le precipitazioni? (s/n): ").strip().lower() == 's'
-    
-    # Ottenere e mostrare le previsioni
-    forecast_data = get_weather_forecast(latitude, longitude, days, include_wind, include_precipitation)
-    
-    if forecast_data:
-        print(f"\nPrevisioni per i prossimi {days} giorni:")
-        for day, temp_max, temp_min, wind, precipitation in zip(
-                forecast_data["daily"]["time"],
-                forecast_data["daily"]["temperature_2m_max"],
-                forecast_data["daily"]["temperature_2m_min"],
-                forecast_data["daily"].get("windspeed_10m_max", []),
-                forecast_data["daily"].get("precipitation_sum", [])
-        ):
-            print(f"Data: {day}")
-            print(f"Temperatura Max: {temp_max}°C, Temperatura Min: {temp_min}°C")
-            if include_wind:
-                print(f"Velocità del vento: {wind} km/h")
-            if include_precipitation:
-                print(f"Precipitazioni: {precipitation} mm")
-            print("-" * 20)
-    else:
-        print("Errore nel recupero delle previsioni meteo.")
-
-if __name__ == "__main__":
-    main()
+        print("data/ora \t velocità vento (km/h) \t temperatura (C°)")
+        for i in range(len(risposta_json["hourly"]["time"])):
+            print(risposta_json["hourly"]["time"][i],"\t", risposta_json["hourly"]["wind_speed_10m"][i],"\t", risposta_json["hourly"]["temperature_2m"][i])
