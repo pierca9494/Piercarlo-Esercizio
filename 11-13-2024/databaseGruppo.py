@@ -148,6 +148,12 @@ class GestioneStudentiDB:
         except mysql.connector.Error as err:
             print(f"Errore: {err}")
 
+    def dati_personali(self,id_studente):
+        self.cursor.execute("SELECT voto from voti where studente_id= %s",(id_studente))
+        voti= [voto[0] for voto in self.cursor.fetchall()]
+        media=sum(voti)/len(voti) if voti else 0
+        return voti,media
+
     def chiudi_connessione(self):
         self.cursor.close()
         self.miodb.close()
@@ -229,9 +235,17 @@ def menu():
                     print("Uscita dal gestionale.")
                     gestione.chiudi_connessione()
                     break
-            elif user["ruolo"] == "studente":
-                print("6. Stampa studenti e medie")
-                gestione.stampa_studenti()
+            elif ruolo == "studente":
+                print("1. -Stampa tutti gli studenti ")
+                print("2. -Stampa solo il tuo voto e tua media")
+                scelta2= input("Seleziona un'opzione: ")
+                if scelta2== "1":
+
+                    print("6. Stampa studenti e medie")
+                    gestione.stampa_studenti()
+                elif scelta2== "2":
+                    pass
+
             else:
                 print("Ruolo non valido")
 
