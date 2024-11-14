@@ -64,6 +64,33 @@ class GestioneStudentiDB:
             database=database)
         
         self.cursor = self.miodb.cursor()
+        
+        
+    
+    self.cursor.execute("CREATE DATABASE IF NOT EXISTS scuola_db")
+    print("Database 'scuola_db' creato con successo.") 
+
+
+    self.cursor.execute("""create table if not exists studenti_
+          (id int AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255)""")
+
+    self.cursor.execute("""
+    CREATE TABLE IF NOT EXISTS materie (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(255)  UNIQUE NOT NULL 
+    )
+""")
+
+    self.cursor.execute (""""
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    studente_id INT,
+    materia_id INT,
+    voto INT,
+    FOREIGN KEY (studente_id) REFERENCES studenti_(id),
+    FOREIGN KEY (materia_id) REFERENCES materie(id)
+    )
+        """)
 
     def aggiungi_studente(self, nome):
         try:
@@ -79,7 +106,7 @@ class GestioneStudentiDB:
             self.miodb.commit()
             print(f"Materia '{materia}' aggiunta.")
         except mysql.connector.Error as err:
-            print(f"Errore: {err}")
+          print(f"Errore: {err}")
 
     def aggiungi_voto(self, nome, materia, voto):
         try:
